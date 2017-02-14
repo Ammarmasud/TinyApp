@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>TinyApp</title>
+</head>
+<body>
+  <header><% include partials/_header %></header>
+  <table>
+    <tr><td>URL</td> <td>Shortened</td></tr>
+    <% for (let url of Object.keys(urls)) { %>
+      <tr><td><%= urls[url] %></td> <td><%= url %></td></tr>
+    <% }; %>
+  </table>
+
+  <a href="/newURL">Add a URL!</a>
+</body>
+</html>
