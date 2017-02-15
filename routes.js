@@ -11,6 +11,16 @@ module.exports = (app) => {
     // res.end("Hello!");
   });
 
+  app.get("/registration", (req, res) => {
+    res.render("urls_register");
+  });
+
+  app.post("/registration", (req, res) => {
+    user.email = req.body.email;
+    res.cookie('username',user.username);
+    res.redirect('/');
+  });
+
   app.post("/login", (req, res) => {
     user.username = req.body.username;
     res.cookie('username',user.username);
