@@ -3,15 +3,39 @@
 <head>
   <title>TinyApp</title>
 </head>
-<body>
+
+<body style="font-size:20px; padding:50px;">
   <header><% include partials/_header %></header>
+
   <table>
-    <tr><td>URL</td> <td>Shortened</td></tr>
+    <tr>
+      <td><b>Shortened</b></td>
+      <td></td>
+      <td><b>URL</b></td>
+    </tr>
+
     <% for (let url of Object.keys(urls)) { %>
-      <tr><td><%= urls[url] %></td> <td><%= url %></td></tr>
+      <tr>
+        <td><%= url %></td>
+        <td>=></td>
+        <td><a href="<%= urls[url] %>"><%= urls[url] %></a></td>
+        <td>
+          <font size="2">
+          <a href="/urls/<%= url %>">
+            Edit
+          </a>
+          </font>
+        </td>
+        <td>
+          <form method="POST" action="/urls/<%= url %>/delete">
+            <input type="submit" value="Delete">
+          </form>
+        </td>
+      </tr>
     <% }; %>
   </table>
 
-  <a href="/newURL">Add a URL!</a>
+  <a href="/urls/new">Add a URL!</a>
+
 </body>
 </html>
