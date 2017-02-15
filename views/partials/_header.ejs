@@ -1,19 +1,29 @@
 <h1>TinyApp</h1>
 
-<% if (username) { %>
+<% if (email) { %>
 
-  User: <b><%= username %></b>
+  User: <b><%= email %></b>
   <form action="/logout" method="POST">
     <input type="submit" value="logout"></input>
   </form>
 
 <% } else { %>
   <form action="/login" method="POST">
-    <div>
-      <label for="username">Name: </label>
-      <input id="username" type="text" name="username" placeholder="username" style="width: 300px">
-    </div>
+    <table>
+      <tr>
+        <td><label for="email">Email:</label></td>
+        <td><input id="email" type="email" name="email"></td>
+      </tr>
+
+      <tr>
+        <td><label for="password">Password:</label></td>
+        <td><input id="password" type="password" name="password"></td>
+      </tr>
+    </table>
+
     <input type="submit" value="Submit">
   </form>
+  <font size="3">No login? No problem! <a href='/registration'>Click here to register</a></font>
+  <p></p>
 
 <% }; %>
