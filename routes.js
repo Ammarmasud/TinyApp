@@ -1,5 +1,7 @@
 const generateRandomString = require('./generateRandomString');
 const checkEmails = require('./checkEmails');
+const bcrypt = require('bcrypt');
+
 const urlDatabase = {
                     "b2xVn2": "http://www.lighthouselabs.ca",
                     "9sm5xK": "http://www.google.com"
@@ -7,7 +9,7 @@ const urlDatabase = {
 const users = {'3Bv2hG':{
                   id:'3Bv2hG',
                   email:'test@test.com',
-                  password:'test',
+                  password: bcrypt.hashSync('test',10),
                   shortURLs: ["b2xVn2","9sm5xK"]
               }};
 
@@ -26,7 +28,7 @@ module.exports = (app) => {
       const id = generateRandomString(users);
       users[id] = {'id':id,
                   'email': req.body.email,
-                  'password': req.body.password,
+                  'password': bcrypt.hashSync(req.body.password, 10),
                   'shortURLs': []};
       res.cookie('user_id',id);
       res.redirect('/');
@@ -39,7 +41,7 @@ module.exports = (app) => {
   // LOGIN
   app.post("/login", (req, res) => {
     let id = checkEmails(users, req.body.email);
-    if (id && users[id].password === req.body.password) {
+    if (id && bcrypt.compareSync(req.body.password, users[id].password)) {
       res.cookie('user_id',id);
       res.redirect('/');
     } else {
@@ -66,7 +68,6 @@ module.exports = (app) => {
       res.statusCode = 403;
       res.redirect('/login');
     }
-
   });
 
   app.post("/urls/:shortURL/delete", (req, res) => {
