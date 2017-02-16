@@ -15,6 +15,7 @@
     </tr>
 
     <% for (let url of Object.keys(urls)) { %>
+      <% if (userURLs.indexOf(url) !== -1) { %>
       <tr>
         <td><%= url %></td>
         <td>=></td>
@@ -32,7 +33,7 @@
           </form>
         </td>
       </tr>
-    <% }; %>
+    <% }}; %>
   </table>
 
   <p></p>
