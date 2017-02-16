@@ -30,7 +30,7 @@ module.exports = (app) => {
                   'email': req.body.email,
                   'password': bcrypt.hashSync(req.body.password, 10),
                   'shortURLs': []};
-      res.cookie('user_id',id);
+      req.session.user_id = id;
       res.redirect('/');
     } else {
       res.statusCode = 400;
@@ -42,7 +42,7 @@ module.exports = (app) => {
   app.post("/login", (req, res) => {
     let id = checkEmails(users, req.body.email);
     if (id && bcrypt.compareSync(req.body.password, users[id].password)) {
-      res.cookie('user_id',id);
+      req.session.user_id = id;
       res.redirect('/');
     } else {
       res.statusCode = 403;
@@ -55,14 +55,15 @@ module.exports = (app) => {
   });
 
   app.post("/logout", (req, res) => {
-    res.clearCookie('user_id',req.cookies.user_id);
+    req.session = null;
+    // res.clearCookie('user_id',req.session.user_id);
     res.redirect('/');
   });
 
   app.get("/urls/new", (req, res) => {
     let email;
-    if (users[req.cookies.user_id]) {
-      email = users[req.cookies.user_id].email;
+    if (users[req.session.user_id]) {
+      email = users[req.session.user_id].email;
       res.render("urls_new",{'email': email});
     } else {
       res.statusCode = 403;
@@ -71,13 +72,12 @@ module.exports = (app) => {
   });
 
   app.post("/urls/:shortURL/delete", (req, res) => {
-    let index = users[req.cookies.user_id].shortURLs.indexOf(req.params.shortURL)
-    // console.log(index, users[req.cookies.user_id].shortURLs.indexOf(req.params.shortURL));
+    let index = users[req.session.user_id].shortURLs.indexOf(req.params.shortURL)
     if (index !== -1) {
       delete urlDatabase[req.params.shortURL];
-      users[req.cookies.user_id].shortURLs.splice(index, 1)
+      users[req.session.user_id].shortURLs.splice(index, 1)
       res.redirect('/urls');
-    } else if (users[req.cookies.user_id]) {
+    } else if (users[req.session.user_id]) {
       res.statusCode = 403;
       res.redirect('/urls');
     } else {
@@ -88,12 +88,12 @@ module.exports = (app) => {
   });
 
   app.post("/urls/:shortURL", (req, res) => {
-    let index = users[req.cookies.user_id].shortURLs.indexOf(req.params.shortURL)
+    let index = users[req.session.user_id].shortURLs.indexOf(req.params.shortURL)
     if (index !== -1) {
       urlDatabase[req.params.shortURL] = req.body['longURL'];
-      users[req.cookies.user_id].push
+      users[req.session.user_id].push
       res.redirect('/urls');
-    } else if (users[req.cookies.user_id]) {
+    } else if (users[req.session.user_id]) {
       res.statusCode = 403;
       res.redirect('/urls');
     } else {
@@ -105,17 +105,17 @@ module.exports = (app) => {
   app.get("/urls/:shortURL", (req, res) => {
     const templateVars = {'shortURL': req.params.shortURL,
                           'longURL': urlDatabase[req.params.shortURL]};
-    if (users[req.cookies.user_id]) {
-      templateVars['email'] = users[req.cookies.user_id].email;
+    if (users[req.session.user_id]) {
+      templateVars['email'] = users[req.session.user_id].email;
     }
     res.render('urls_show', templateVars);
   });
 
   app.post("/urls", (req, res) => {
-    if (users[req.cookies.user_id]) {
+    if (users[req.session.user_id]) {
       let shortURL = generateRandomString(urlDatabase);
       urlDatabase[shortURL] = req.body['longURL'];
-      users[req.cookies.user_id].shortURLs.push(shortURL);
+      users[req.session.user_id].shortURLs.push(shortURL);
       res.redirect('/urls');
     }
   });
@@ -123,9 +123,9 @@ module.exports = (app) => {
   app.get("/urls", (req, res) => {
     let email;
     let userURLs = [];
-    if (users[req.cookies.user_id]) {
-      email = users[req.cookies.user_id].email;
-      userURLs = users[req.cookies.user_id].shortURLs;
+    if (users[req.session.user_id]) {
+      email = users[req.session.user_id].email;
+      userURLs = users[req.session.user_id].shortURLs;
     }
 
     const templateVars =  {'urls': urlDatabase,

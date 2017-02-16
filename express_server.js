@@ -1,7 +1,7 @@
 const routes = require('./routes');
 const express = require("express");
 const bodyParser = require("body-parser");
-const cookieParser = require('cookie-parser');
+const cookieSession = require('cookie-session');
 
 const app = express();
 const PORT = process.env.PORT || 8080; // default port 8080
@@ -12,7 +12,8 @@ app.set("view engine", "ejs");
 // Attach middleware
 app.use(bodyParser.json()); // Parse form submissions in multiple formats
 app.use(bodyParser.urlencoded({extended: true}));
-app.use(cookieParser());
+app.use(cookieSession({name:'session',
+                      keys:['key']}));
 
 routes(app);
 
