@@ -4,7 +4,7 @@ const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
-const users = {};
+const users = {'3Bv2hG':{id:'3Bv2hG',email:'test@test.com',password:'test'}};
 
 module.exports = (app) => {
   app.get("/", (req, res) => {
@@ -30,16 +30,28 @@ module.exports = (app) => {
     }
   });
 
-  // app.post("/login", (req, res) => {
-  //   user.username = req.body.username;
-  //   res.cookie('user_id',users.id);
-  //   res.redirect('/');
-  // });
+  // LOGIN
+  app.post("/login", (req, res) => {
+    let id = checkEmails(users, req.body.email)
+    if (id && users[id].password === req.body.password) {
+      res.cookie('user_id',id);
+      res.redirect('/');
+    } else {
+      res.statusCode = 403;
+      res.redirect('/login');
+    }
 
-  // app.post("/logout", (req, res) => {
-  //   res.clearCookie('user_id',users.id);
-  //   res.redirect('/');
-  // });
+  });
+
+  app.get("/login", (req, res) => {
+    res.render("urls_login");
+  });
+
+  app.post("/logout", (req, res) => {
+    let id = req.cookies.user_id
+    res.clearCookie('user_id',id);
+    res.redirect('/');
+  });
 
   app.get("/urls/new", (req, res) => {
     let email;

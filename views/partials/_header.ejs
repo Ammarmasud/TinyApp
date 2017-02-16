@@ -8,22 +8,8 @@
   </form>
 
 <% } else { %>
-  <form action="/login" method="POST">
-    <table>
-      <tr>
-        <td><label for="email">Email:</label></td>
-        <td><input id="email" type="email" name="email"></td>
-      </tr>
-
-      <tr>
-        <td><label for="password">Password:</label></td>
-        <td><input id="password" type="password" name="password"></td>
-      </tr>
-    </table>
-
-    <input type="submit" value="Submit">
-  </form>
-  <font size="3">No login? No problem! <a href='/registration'>Click here to register</a></font>
-  <p></p>
+  <font size="4"><a href='/login'>Login</a></font><br>
+  <font size="4"><a href='/registration'>Register</a></font>
 
 <% }; %>
+<p></p>

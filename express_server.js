@@ -18,7 +18,7 @@ routes(app);
 
 // Listening for call. Can use `app.get('port')` instead of PORT variable
 app.listen(PORT, () => {
-  // console.log(`Example app listening on port ${PORT}!`);
+  console.log(`Example app listening on port ${PORT}!`);
 });
 
 // module.exports = app;
