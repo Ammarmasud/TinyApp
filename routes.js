@@ -203,7 +203,7 @@ module.exports = (app) => {
     }
   });
 
-  app.get("/urls.json", (req, res) => {
-    res.json(urlDatabase);
-  });
+  // app.get("/urls.json", (req, res) => {
+  //   res.json(urlDatabase);
+  // });
 }
