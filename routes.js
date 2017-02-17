@@ -14,13 +14,22 @@ const users = {'3Bv2hG':{
               }};
 
 module.exports = (app) => {
+  // Main page is a redirect to urls
   app.get("/", (req, res) => {
-    res.redirect('/urls');
-    // res.end("Hello!");
+    if (users[req.session.user_id]) {
+      res.redirect('/urls');
+    } else {
+      res.redirect('/login');
+    }
   });
 
+  // Registration
   app.get("/registration", (req, res) => {
-    res.render("urls_register");
+    if (users[req.session.user_id]) {
+      res.redirect('/');
+    } else {
+      res.render("urls_register");
+    }
   });
 
   app.post("/registration", (req, res) => {
@@ -32,9 +41,10 @@ module.exports = (app) => {
                   'shortURLs': []};
       req.session.user_id = id;
       res.redirect('/');
+    } else if (req.body.email && req.body.password && checkEmails(users, req.body.email)) {
+      res.status(400).send(`<h1>400 Error: </h1><p>Email already exists.</p><a href='/registration'>Try registering again.</a>`);
     } else {
-      res.statusCode = 400;
-      res.redirect('/registration');
+      res.status(400).send(`<h1>400 Error: </h1><p>Left field blank.</p><a href='/registration'>Try registering again.</a>`);
     }
   });
 
@@ -45,101 +55,119 @@ module.exports = (app) => {
       req.session.user_id = id;
       res.redirect('/');
     } else {
-      res.statusCode = 403;
-      res.redirect('/login');
+      res.status(401).send(`<h1>401 Error: </h1><p>Incorrect username of password.</p><a href='/login'>Click here to head to try again.</a>`);
     }
   });
 
   app.get("/login", (req, res) => {
-    res.render("urls_login");
+    if (users[req.session.user_id]) {
+      res.redirect('/');
+    } else {
+      res.render("urls_login");
+    }
   });
 
-  app.post("/logout", (req, res) => {
+  // Logging out
+  app.delete("/logout", (req, res) => {
     req.session = null;
-    // res.clearCookie('user_id',req.session.user_id);
     res.redirect('/');
   });
 
+  // page to add (create) a new short url
   app.get("/urls/new", (req, res) => {
     let email;
     if (users[req.session.user_id]) {
       email = users[req.session.user_id].email;
       res.render("urls_new",{'email': email});
     } else {
-      res.statusCode = 403;
-      res.redirect('/login');
+      res.status(401).send(`<h1>401 Error: </h1><p>Not logged in.</p><a href='/login'>Click here to login</a>`);
     }
   });
 
-  app.post("/urls/:shortURL/delete", (req, res) => {
+  // Delete a short url
+  app.delete("/urls/:shortURL/delete", (req, res) => {
     let index = users[req.session.user_id].shortURLs.indexOf(req.params.shortURL)
     if (index !== -1) {
       delete urlDatabase[req.params.shortURL];
       users[req.session.user_id].shortURLs.splice(index, 1)
       res.redirect('/urls');
     } else if (users[req.session.user_id]) {
-      res.statusCode = 403;
+      res.status(403);
       res.redirect('/urls');
     } else {
-      res.statusCode = 403;
+      res.status(403);
       res.redirect('/login');
     }
 
   });
 
-  app.post("/urls/:shortURL", (req, res) => {
-    let index = users[req.session.user_id].shortURLs.indexOf(req.params.shortURL)
-    if (index !== -1) {
-      urlDatabase[req.params.shortURL] = req.body['longURL'];
-      users[req.session.user_id].push
+  // Update a short url redirect
+  app.put("/urls/:shortURL", (req, res) => {
+    let shortURL = req.params.shortURL;
+    let index = users[req.session.user_id].shortURLs.indexOf(shortURL);
+    if (!(urlDatabase[shortURL])) {
+      res.status(404).send(`<h1>404 Error: </h1><p>The short URL used doesn't exist.</p><a href='/'>Click here to head to the homepage.</a>`);
+    } else if (index !== -1) {
+      urlDatabase[shortURL] = req.body['longURL'];
       res.redirect('/urls');
     } else if (users[req.session.user_id]) {
-      res.statusCode = 403;
-      res.redirect('/urls');
+      res.status(403).send(`<h1>403 Error: </h1><p>Not your short URL.</p>`);
     } else {
-      res.statusCode = 403;
-      res.redirect('/login');
+      res.status(401).send(`<h1>401 Error: </h1><p>Not logged in.</p><a href='/login'>Click here to login</a>`);
     }
   });
 
+  // Show url redirect
   app.get("/urls/:shortURL", (req, res) => {
-    const templateVars = {'shortURL': req.params.shortURL,
-                          'longURL': urlDatabase[req.params.shortURL]};
-    if (users[req.session.user_id]) {
-      templateVars['email'] = users[req.session.user_id].email;
+    let shortURL = req.params.shortURL;
+    if (!(urlDatabase[shortURL])) {
+      res.status(404).send(`<h1>404 Error: </h1><p>The short URL used doesn't exist.</p><a href='/'>Click here to head to the homepage.</a>`);
     }
-    res.render('urls_show', templateVars);
+    // Not logged in
+    if (users[req.session.user_id] && users[req.session.user_id].shortURLs.indexOf(shortURL) !== -1) {
+      const templateVars = {'shortURL': req.params.shortURL,
+                            'longURL': urlDatabase[req.params.shortURL],
+                            'email': users[req.session.user_id].email};
+      res.render('urls_show', templateVars);
+    } else if (users[req.session.user_id] && users[req.session.user_id].shortURLs.indexOf(shortURL) === -1) {
+      res.status(403).send(`<h1>403 Error: </h1><p>Not your short URL.</p><a href='/urls'>Click here to go back to your urls page.</a>`);
+    } else {
+      res.status(401).send(`<h1>401 Error: </h1><p>Not logged in.</p><a href='/login'>Click here to login</a>`);
+    }
+
   });
 
+  // Create new short url
   app.post("/urls", (req, res) => {
     if (users[req.session.user_id]) {
       let shortURL = generateRandomString(urlDatabase);
       urlDatabase[shortURL] = req.body['longURL'];
       users[req.session.user_id].shortURLs.push(shortURL);
-      res.redirect('/urls');
+      res.redirect(`/urls/${shortURL}`);
+    } else {
+      res.status(401).send(`<h1>401 Error: </h1><p>Not logged in.</p><a href='/login'>Click here to login</a>`)
     }
   });
 
+  // urls list
   app.get("/urls", (req, res) => {
-    let email;
-    let userURLs = [];
     if (users[req.session.user_id]) {
-      email = users[req.session.user_id].email;
-      userURLs = users[req.session.user_id].shortURLs;
+      const templateVars =  {'urls': urlDatabase,
+                            'userURLs': users[req.session.user_id].shortURLs,
+                            'email': users[req.session.user_id].email};
+      res.render('urls_index', templateVars);
+    } else {
+      res.status(401).send(`<h1>401 Error: </h1><p>Not logged in.</p><a href='/login'>Click here to login</a>`)
     }
-
-    const templateVars =  {'urls': urlDatabase,
-                          'userURLs': userURLs,
-                          'email': email};
-    res.render('urls_index', templateVars);
   });
 
+  // short url redirect
   app.get("/u/:shortURL", (req, res) => {
     if (req.params.shortURL in urlDatabase) {
       let longURL = urlDatabase[req.params.shortURL];
       res.redirect(longURL);
     } else {
-      res.statusCode = 404;
+      res.status(401).send(`<h1>404 Error: </h1><p>The short URL doesn't exist.</p><a href='/'>Click here to go to the home page</a>`)
       res.redirect('/urls');
     }
   });
@@ -147,8 +175,4 @@ module.exports = (app) => {
   // app.get("/urls.json", (req, res) => {
   //   res.json(urlDatabase);
   // });
-
-  app.get("/hello", (req, res) => {
-    res.end("<html><body>Hello <b>World</b></body></html>\n"); //can also use `res.send()`
-  });
 }

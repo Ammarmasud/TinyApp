@@ -3,7 +3,10 @@
 <% if (email) { %>
 
   User: <b><%= email %></b>
-  <form action="/logout" method="POST">
+  <form action="/urls" method="GET">
+    <input type="submit" value="My Links"></input>
+  </form>
+  <form action="/logout?_method=DELETE" method="POST">
     <input type="submit" value="logout"></input>
   </form>
 

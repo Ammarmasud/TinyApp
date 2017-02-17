@@ -8,12 +8,16 @@
 
   <header><% include partials/_header %></header>
 
-  <form action="/urls/<%= shortURL %>" method="POST">
+  <form action="/urls/<%= shortURL %>?_method=PUT" method="POST">
     <label for="longURL"><b>ShortURL: </b><%= shortURL %> =></label>
 
     <input id="longURL" type="text" name="longURL" value="<%= longURL %>" style="width: 300px">
 
     <input type="submit" value="Update">
+  </form>
+
+  <form action="/urls/<%= shortURL %>/delete?_method=DELETE" method="POST">
+      <input type="submit" value="Delete">
   </form>
 
 </body>
