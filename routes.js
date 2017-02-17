@@ -1,10 +1,17 @@
 const generateRandomString = require('./generateRandomString');
 const checkEmails = require('./checkEmails');
 const bcrypt = require('bcrypt');
+const fs = require('fs');
 
 const urlDatabase = {
-                    "b2xVn2": "http://www.lighthouselabs.ca",
-                    "9sm5xK": "http://www.google.com"
+                    "b2xVn2": {'longURL':"http://www.lighthouselabs.ca",
+                              'visits':0,
+                              'uniqueVisits':0,
+                              'visitors':[]},
+                    "9sm5xK": {'longURL':"http://www.google.com",
+                              'visits':0,
+                              'uniqueVisits':0,
+                              'visitors':[]}
                     };
 const users = {'3Bv2hG':{
                   id:'3Bv2hG',
@@ -108,7 +115,7 @@ module.exports = (app) => {
     if (!(urlDatabase[shortURL])) {
       res.status(404).send(`<h1>404 Error: </h1><p>The short URL used doesn't exist.</p><a href='/'>Click here to head to the homepage.</a>`);
     } else if (index !== -1) {
-      urlDatabase[shortURL] = req.body['longURL'];
+      urlDatabase[shortURL].longURL = req.body.longURL;
       res.redirect('/urls');
     } else if (users[req.session.user_id]) {
       res.status(403).send(`<h1>403 Error: </h1><p>Not your short URL.</p>`);
@@ -125,8 +132,8 @@ module.exports = (app) => {
     }
     // Not logged in
     if (users[req.session.user_id] && users[req.session.user_id].shortURLs.indexOf(shortURL) !== -1) {
-      const templateVars = {'shortURL': req.params.shortURL,
-                            'longURL': urlDatabase[req.params.shortURL],
+      const templateVars = {'shortURL': shortURL,
+                            'longURL': urlDatabase[req.params.shortURL].longURL,
                             'email': users[req.session.user_id].email};
       res.render('urls_show', templateVars);
     } else if (users[req.session.user_id] && users[req.session.user_id].shortURLs.indexOf(shortURL) === -1) {
@@ -141,7 +148,11 @@ module.exports = (app) => {
   app.post("/urls", (req, res) => {
     if (users[req.session.user_id]) {
       let shortURL = generateRandomString(urlDatabase);
-      urlDatabase[shortURL] = req.body['longURL'];
+      urlDatabase[shortURL] = {'longURL':req.body.longURL,
+                              'visits':0,
+                              'uniqueVisits':0,
+                              'visitors':[]};
+      urlDatabase[shortURL].longURL = req.body.longURL;
       users[req.session.user_id].shortURLs.push(shortURL);
       res.redirect(`/urls/${shortURL}`);
     } else {
@@ -164,11 +175,10 @@ module.exports = (app) => {
   // short url redirect
   app.get("/u/:shortURL", (req, res) => {
     if (req.params.shortURL in urlDatabase) {
-      let longURL = urlDatabase[req.params.shortURL];
+      let longURL = urlDatabase[req.params.shortURL].longURL;
       res.redirect(longURL);
     } else {
       res.status(401).send(`<h1>404 Error: </h1><p>The short URL doesn't exist.</p><a href='/'>Click here to go to the home page</a>`)
-      res.redirect('/urls');
     }
   });
 
