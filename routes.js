@@ -134,7 +134,8 @@ module.exports = (app) => {
     if (users[req.session.user_id] && users[req.session.user_id].shortURLs.indexOf(shortURL) !== -1) {
       const templateVars = {'shortURL': shortURL,
                             'longURL': urlDatabase[req.params.shortURL].longURL,
-                            'email': users[req.session.user_id].email};
+                            'email': users[req.session.user_id].email,
+                            'visitors': urlDatabase[req.params.shortURL].visitors};
       res.render('urls_show', templateVars);
     } else if (users[req.session.user_id] && users[req.session.user_id].shortURLs.indexOf(shortURL) === -1) {
       res.status(403).send(`<h1>403 Error: </h1><p>Not your short URL.</p><a href='/urls'>Click here to go back to your urls page.</a>`);
@@ -176,13 +177,31 @@ module.exports = (app) => {
   app.get("/u/:shortURL", (req, res) => {
     if (req.params.shortURL in urlDatabase) {
       let longURL = urlDatabase[req.params.shortURL].longURL;
+      urlDatabase[req.params.shortURL].visits += 1;
+      let identifier;
+
+      // check if user already has a user id cookie
+      if (req.session.user_id) {
+        identifier = req.session.user_id;
+      } else if (req.session.visitor_id) {
+        identifier = req.session.visitor_id;
+      } else {
+        const id = generateRandomString(users);
+        req.session.visitor_id = id;
+        users[id] = {id:id,
+                    email:id,
+                    password: bcrypt.hashSync(id,10),
+                    shortURLs: []};
+        identifier = id;
+      }
+      urlDatabase[req.params.shortURL].visitors.push([new Date(),identifier]);
       res.redirect(longURL);
     } else {
       res.status(401).send(`<h1>404 Error: </h1><p>The short URL doesn't exist.</p><a href='/'>Click here to go to the home page</a>`)
     }
   });
 
-  // app.get("/urls.json", (req, res) => {
-  //   res.json(urlDatabase);
-  // });
+  app.get("/urls.json", (req, res) => {
+    res.json(urlDatabase);
+  });
 }

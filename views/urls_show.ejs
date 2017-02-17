@@ -20,5 +20,11 @@
       <input type="submit" value="Delete">
   </form>
 
+  <table>
+    <% for (let visit of visitors) { %>
+      <tr><td><%= visit[0] %>, </td><td><%= visit[1] %></td></tr>
+    <% } %>
+  </table>
+
 </body>
 </html>
