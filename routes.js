@@ -1,5 +1,6 @@
 const generateRandomString = require('./generateRandomString');
 const checkEmails = require('./checkEmails');
+const checkVisitIds = require('./checkVisitIds');
 const bcrypt = require('bcrypt');
 const fs = require('fs');
 
@@ -19,6 +20,7 @@ const users = {'3Bv2hG':{
                   password: bcrypt.hashSync('test',10),
                   shortURLs: ["b2xVn2","9sm5xK"]
               }};
+const visitor_ids = ['5lQ2hG']
 
 module.exports = (app) => {
   // Main page is a redirect to urls
@@ -115,7 +117,10 @@ module.exports = (app) => {
     if (!(urlDatabase[shortURL])) {
       res.status(404).send(`<h1>404 Error: </h1><p>The short URL used doesn't exist.</p><a href='/'>Click here to head to the homepage.</a>`);
     } else if (index !== -1) {
-      urlDatabase[shortURL].longURL = req.body.longURL;
+      urlDatabase[shortURL] = { 'longURL': req.body.longURL,
+                                'visits':0,
+                                'uniqueVisits':0,
+                                'visitors':[]};
       res.redirect('/urls');
     } else if (users[req.session.user_id]) {
       res.status(403).send(`<h1>403 Error: </h1><p>Not your short URL.</p>`);
@@ -135,6 +140,8 @@ module.exports = (app) => {
       const templateVars = {'shortURL': shortURL,
                             'longURL': urlDatabase[req.params.shortURL].longURL,
                             'email': users[req.session.user_id].email,
+                            'visits': urlDatabase[req.params.shortURL].visits,
+                            'uniqueVisits': urlDatabase[req.params.shortURL].uniqueVisits,
                             'visitors': urlDatabase[req.params.shortURL].visitors};
       res.render('urls_show', templateVars);
     } else if (users[req.session.user_id] && users[req.session.user_id].shortURLs.indexOf(shortURL) === -1) {
@@ -178,26 +185,21 @@ module.exports = (app) => {
     if (req.params.shortURL in urlDatabase) {
       let longURL = urlDatabase[req.params.shortURL].longURL;
       urlDatabase[req.params.shortURL].visits += 1;
-      let identifier;
 
-      // check if user already has a user id cookie
-      if (req.session.user_id) {
-        identifier = req.session.user_id;
-      } else if (req.session.visitor_id) {
-        identifier = req.session.visitor_id;
+      // check if visitor already has a visitor id cookie
+      if (req.session.visitor_id) {
+        urlDatabase[req.params.shortURL].uniqueVisits += checkVisitIds(urlDatabase[req.params.shortURL].visitors, req.session.visitor_id);
       } else {
-        const id = generateRandomString(users);
+        const id = generateRandomString(visitor_ids);
+        urlDatabase[req.params.shortURL].uniqueVisits += 1;
+        visitor_ids.push(id);
         req.session.visitor_id = id;
-        users[id] = {id:id,
-                    email:id,
-                    password: bcrypt.hashSync(id,10),
-                    shortURLs: []};
-        identifier = id;
-      }
-      urlDatabase[req.params.shortURL].visitors.push([new Date(),identifier]);
+      };
+
+      urlDatabase[req.params.shortURL].visitors.push([new Date(), req.session.visitor_id]);
       res.redirect(longURL);
     } else {
-      res.status(401).send(`<h1>404 Error: </h1><p>The short URL doesn't exist.</p><a href='/'>Click here to go to the home page</a>`)
+      res.status(401).send(`<h1>404 Error: </h1><p>The short URL doesn't exist.</p><a href='/'>Click here to go to the home page</a>`);
     }
   });
 

@@ -6,7 +6,9 @@ function generateRandomString(urls) {
     shortUrlArr.push(possible.charAt(Math.floor(Math.random() * possible.length)));
   }
 
-  if (urls[shortUrlArr.join("")]) {
+  if (Array.isArray(urls) && urls.indexOf(shortUrlArr.join("")) !== -1) {
+    return generateRandomString(urls);
+  } else if (!Array.isArray(urls) && urls[shortUrlArr.join("")]) {
     return generateRandomString(urls);
   } else {
     return shortUrlArr.join("");

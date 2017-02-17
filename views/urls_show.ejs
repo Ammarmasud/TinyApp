@@ -20,9 +20,17 @@
       <input type="submit" value="Delete">
   </form>
 
+  <br>
   <table>
+    <tr><td><b>Total Visits: </b></td><td><%= visits %></td></tr>
+    <tr><td><b>Total Unique Visits: </b></td><td><%= uniqueVisits %></td></tr>
+  </table>
+  <br>
+
+  <table>
+    <tr><td><b>Time Stamp</b></td><td><b>Visitor ID</b></td></tr>
     <% for (let visit of visitors) { %>
-      <tr><td><%= visit[0] %>, </td><td><%= visit[1] %></td></tr>
+      <tr><td><%= visit[0] %> </td><td><%= visit[1] %></td></tr>
     <% } %>
   </table>
 
