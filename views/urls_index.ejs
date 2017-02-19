@@ -31,12 +31,12 @@
         <td><a href="<%= urls[url]['longURL'] %>"><%= urls[url]['longURL'] %></a></td>
 
         <td>
-          <a href="/urls/<%= url %>">
-            <button type="submit" type="button" class="btn btn-info btn-xs">Edit</button>
-          </a>
-
           <form method="POST" action="/urls/<%= url %>/delete?_method=DELETE">
-            <button type="submit" class="btn btn-danger btn-xs">Delete</button>
+            <div class="btn-group">
+              <a href="/urls/<%= url %>" type="submit" type="button" class="btn btn-info btn-xs">Edit</a>
+
+              <button type="submit"  class="btn btn-danger btn-xs">Delete</button>
+            </div>
           </form>
         </td>
       </tr>

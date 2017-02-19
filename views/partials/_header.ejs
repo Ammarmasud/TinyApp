@@ -14,7 +14,7 @@
         </li>
       </ul>
 
-      <ul class="nav navbar-nav navbar-right">
+      <ul class="nav navbar-nav navbar-right" style="margin-right:1px;">
         <li class="navbar-text"><%= email %></li>
         <li>
           <form action="/logout?_method=DELETE" method="POST">
@@ -25,14 +25,6 @@
 
     </div>
   </nav>
-
-<!--   User: <b><%= email %></b>
-  <form action="/urls" method="GET">
-    <input type="submit" value="My Links"></input>
-  </form>
-  <form action="/logout?_method=DELETE" method="POST">
-    <input type="submit" value="logout"></input>
-  </form> -->
 
 <% } else { %>
   <font size="4"><a href='/login'>Login</a></font><br>

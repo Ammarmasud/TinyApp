@@ -10,35 +10,59 @@
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 </head>
 
-<body style="font-size:20px; padding:50px;">
-
+<body>
   <header><% include partials/_header %></header>
 
-  <form action="/urls/<%= shortURL %>?_method=PUT" method="POST">
-    <label for="longURL"><b>ShortURL: </b><%= shortURL %> =></label>
+  <div class="container" style="font-size:20px; padding:50px;">
+    <form action="/urls/<%= shortURL %>?_method=PUT" method="POST" class="form-horizantal" style="margin:50px;">
+      <div class="form-group">
+        <label for="longURL" class="control-label col-sm-2" style=""><%= shortURL %>:</label>
 
-    <input id="longURL" type="text" name="longURL" value="<%= longURL %>" style="width: 300px">
+        <div class="col-sm-10" style="">
+          <input id="longURL" class="form-control" type="text" name="longURL" value="<%= longURL %>"">
+        </div>
+      </div>
 
-    <input type="submit" value="Update">
-  </form>
+      <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+        <button type="submit" style="width:80px" class="btn btn-success">Update</button>
+        </div>
+      </div>
+    </form>
 
-  <form action="/urls/<%= shortURL %>/delete?_method=DELETE" method="POST">
-      <input type="submit" value="Delete">
-  </form>
+    <form action="/urls/<%= shortURL %>/delete?_method=DELETE" method="POST" style="margin:50px;">
+      <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+        <button type="submit" style="width:80px" class="btn btn-danger">Delete</button>
+        </div>
+      </div>
+    </form>
+  </div>
 
   <br>
-  <table>
-    <tr><td><b>Total Visits: </b></td><td><%= visits %></td></tr>
-    <tr><td><b>Total Unique Visits: </b></td><td><%= uniqueVisits %></td></tr>
-  </table>
   <br>
+  <div class="contrainer col-sm-offset-1">
+    <p><b>Total Visits: </b><%= visits %></p>
+    <p><b>Total Unique Visits: </b><%= uniqueVisits %></p>
+  </div>
 
-  <table>
-    <tr><td><b>Time Stamp</b></td><td><b>Visitor ID</b></td></tr>
-    <% for (let visit of visitors) { %>
-      <tr><td><%= visit[0] %> </td><td><%= visit[1] %></td></tr>
-    <% } %>
-  </table>
+  <br>
+  <div class="container">
+    <table class="table table-hover table-condensed table-responsive">
+      <thead>
+      <tr>
+        <td><b>Time Stamp</b></td>
+        <td><b>Visitor ID</b></td>
+      </tr>
+      </thead>
+
+      <tbody>
+      <% for (let visit of visitors) { %>
+        <tr><td><%= visit[0] %> </td><td><%= visit[1] %></td></tr>
+      <% } %>
+      </tbody>
+    </table>
+  </div>
 
 </body>
 </html>
