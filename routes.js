@@ -116,6 +116,8 @@ module.exports = (app) => {
     let index = users[req.session.user_id].shortURLs.indexOf(shortURL);
     if (!(urlDatabase[shortURL])) {
       res.status(404).send(`<h1>404 Error: </h1><p>The short URL used doesn't exist.</p><a href='/'>Click here to head to the homepage.</a>`);
+    } else if (req.body.longURL === urlDatabase[shortURL].longURL) {
+      res.status(403).send(`<h1>403 Error: </h1><p>Short URL unchanged.</p>`);
     } else if (index !== -1) {
       urlDatabase[shortURL] = { 'longURL': req.body.longURL,
                                 'visits':0,
@@ -182,7 +184,7 @@ module.exports = (app) => {
 
   // short url redirect
   app.get("/u/:shortURL", (req, res) => {
-    if (req.params.shortURL in urlDatabase) {
+    if (urlDatabase[req.params.shortURL]) {
       let longURL = urlDatabase[req.params.shortURL].longURL;
       urlDatabase[req.params.shortURL].visits += 1;
 
@@ -197,7 +199,11 @@ module.exports = (app) => {
       };
 
       urlDatabase[req.params.shortURL].visitors.push([new Date(), req.session.visitor_id]);
-      res.redirect(longURL);
+      if (longURL.includes("http://") || longURL.includes("https://")) {
+        res.redirect(longURL);
+      } else {
+        res.redirect("http://"+longURL);
+      }
     } else {
       res.status(401).send(`<h1>404 Error: </h1><p>The short URL doesn't exist.</p><a href='/'>Click here to go to the home page</a>`);
     }

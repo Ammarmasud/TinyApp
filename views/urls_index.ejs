@@ -1,43 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
   <title>TinyApp</title>
 </head>
 
-<body style="font-size:20px; padding:50px;">
+<body>
   <header><% include partials/_header %></header>
 
-  <table>
-    <tr>
-      <td><b>Shortened</b></td>
-      <td></td>
-      <td><b>URL</b></td>
-    </tr>
+  <div class="container">
+  <table class="table table-hover table-condensed table-responsive">
+    <thead>
+      <tr>
+        <td><b>Shortened</b></td>
+        <td><b>URL</b></td>
+        <td></td>
+      </tr>
+    </thead>
 
+    <tbody>
     <% for (let url of Object.keys(urls)) { %>
       <% if (userURLs.indexOf(url) !== -1) { %>
       <tr>
         <td><%= url %></td>
-        <td>=></td>
         <td><a href="<%= urls[url]['longURL'] %>"><%= urls[url]['longURL'] %></a></td>
-        <td>
-          <font size="2">
-          <a href="/urls/<%= url %>">
-            Edit
-          </a>
-          </font>
-        </td>
+
         <td>
           <form method="POST" action="/urls/<%= url %>/delete?_method=DELETE">
-            <input type="submit" value="Delete">
+            <div class="btn-group">
+              <a href="/urls/<%= url %>" type="submit" type="button" class="btn btn-info btn-xs">Edit</a>
+
+              <button type="submit"  class="btn btn-danger btn-xs">Delete</button>
+            </div>
           </form>
         </td>
       </tr>
     <% }}; %>
+    </tbody>
   </table>
 
   <p></p>
   <font size="4"><a href="/urls/new">Add a URL!</a></font>
 
+  </div>
 </body>
 </html>
